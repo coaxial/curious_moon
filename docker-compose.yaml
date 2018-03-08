@@ -1,0 +1,16 @@
+---
+version: '3'
+services:
+  database:
+    image: postgres:10
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  client:
+    image: postgres:10
+    environment:
+      PGPASSWORD: postgres
+volumes:
+  pgdata:
