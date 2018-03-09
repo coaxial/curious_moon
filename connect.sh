@@ -1,2 +1,2 @@
 #!/bin/bash
-docker-compose exec client psql -h database -U postgres
+docker-compose exec database psql -h database -U postgres
