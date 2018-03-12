@@ -9,27 +9,27 @@ insert into events(
   request_id
 )
 select
-  master_plan.start_time_utc::timestamp,
-  master_plan.title,
-  master_plan.description,
+  import.master_plan.start_time_utc::timestamp,
+  import.master_plan.title,
+  import.master_plan.description,
   event_types.id as event_type_id,
   spass_types.id as spass_types_id,
   targets.id as target_id,
   teams.id as teams_id,
   requests.id as requests_id
-from master_plan
+from import.master_plan
 left join event_types
   on event_types.description
-  = master_plan.library_definition
+  = import.master_plan.library_definition
 left join targets
   on targets.description
-  = master_plan.target
+  = import.master_plan.target
 left join teams
   on teams.description
-  = master_plan.team
+  = import.master_plan.team
 left join requests
   on requests.description
-  = master_plan.request_name
+  = import.master_plan.request_name
 left join spass_types
   on spass_types.description
-  = master_plan.spass_type;
+  = import.master_plan.spass_type;

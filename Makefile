@@ -19,7 +19,7 @@ master:
 # Can't use sql/0002-import-csv.sql directly because we need to
 # replace the full path to the CSV file
 import: master
-	@echo "copy master_plan from \
+	@echo "copy import.master_plan from \
 	'$(CSV_FILE)' with delimiter ',' header csv;" >> $(DOIT_SCRIPT)
 
 normalize: import
