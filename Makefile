@@ -13,8 +13,11 @@ INMS_CSV=$(DATA_DIR)/inms.csv
 INMS_ARCHIVE=$(DATA_DIR)/inms.csv.xz
 INMS_SCRIPT=$(SQL_DIR)/0007-inms-import.sql
 IMPORT_INMS_SCRIPT=$(OUTPUT_DIR)/inms.sql
+CDA_CSV=$(DATA_DIR)/cda.csv
+CDA_ARCHIVE=$(DATA_DIR)/cda.csv.xz
+CDA_SCRIPT=$(SQL_DIR)/0010-cda-import.sql
 
-all: normalize-mp inms
+all: normalize-mp inms cda
 	psql $(DB_NAME) -U postgres -f $(DOIT_SCRIPT)
 
 masterplan:
@@ -39,6 +42,12 @@ endif
 # postgres wants absolute paths
 # $$ is a litteral $ for make
 	sed -e "s|^from '.*'$$|from '$(INMS_CSV)'|" $(INMS_SCRIPT) >> $(DOIT_SCRIPT)
+
+cda: normalize-mp
+ifeq ("$(wildcard $(CDA_CSV))","")
+	@unxz --keep $(CDA_ARCHIVE)
+endif
+	sed -e "s|^from '.*'$$|from '$(CDA_CSV)'|" $(CDA_SCRIPT) >> $(DOIT_SCRIPT)
 
 clean:
 	@rm -rf $(DOIT_SCRIPT)
