@@ -1,1 +1,3 @@
 !sql/*.sql
+data/inms.csv
+!data/inms.csv.xz
