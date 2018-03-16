@@ -7,6 +7,7 @@ IMPORT_SCRIPT=$(SQL_DIR)/0002-import.sql
 CREATE_EVENTS_SCRIPT=$(SQL_DIR)/0004-create-events-table.sql
 CREATE_LOOKUPS_SCRIPT=$(SQL_DIR)/0003-create-lookups.sql
 NORMALIZE_SCRIPT=$(SQL_DIR)/0005-normalize.sql
+MATVIEW_SCRIPT=$(SQL_DIR)/0006-materialized-view.sql
 OUTPUT_DIR=${CURDIR}/build
 DOIT_SCRIPT=$(OUTPUT_DIR)/doit.sql
 INMS_CSV=$(DATA_DIR)/inms.csv
@@ -16,8 +17,11 @@ IMPORT_INMS_SCRIPT=$(OUTPUT_DIR)/inms.sql
 CDA_CSV=$(DATA_DIR)/cda.csv
 CDA_ARCHIVE=$(DATA_DIR)/cda.csv.xz
 CDA_SCRIPT=$(SQL_DIR)/0010-cda-import.sql
+NADIRS_SCRIPT=$(SQL_DIR)/0008-nadirs.sql
+FLYBYS_SCRIPT=$(SQL_DIR)/0009-flybys-table.sql
 
-all: normalize-mp inms cda
+all: normalize-mp flyby inms cda
+	@createdb $(DB_NAME)
 	psql $(DB_NAME) -U postgres -f $(DOIT_SCRIPT)
 
 masterplan:
@@ -33,6 +37,7 @@ normalize-mp: import-mp
 	@cat $(CREATE_LOOKUPS_SCRIPT) >> $(DOIT_SCRIPT)
 	@cat $(CREATE_EVENTS_SCRIPT) >> $(DOIT_SCRIPT)
 	@cat $(NORMALIZE_SCRIPT) >> $(DOIT_SCRIPT)
+	@cat $(MATVIEW_SCRIPT) >> $(DOIT_SCRIPT)
 
 inms: normalize-mp
 # don't extract csv if it already exists
@@ -43,6 +48,10 @@ endif
 # $$ is a litteral $ for make
 	sed -e "s|^from '.*'$$|from '$(INMS_CSV)'|" $(INMS_SCRIPT) >> $(DOIT_SCRIPT)
 
+flyby: inms
+	@cat $(NADIRS_SCRIPT) >> $(DOIT_SCRIPT)
+	@cat $(FLYBYS_SCRIPT) >> $(DOIT_SCRIPT)
+
 cda: normalize-mp
 ifeq ("$(wildcard $(CDA_CSV))","")
 	@unxz --keep $(CDA_ARCHIVE)
@@ -52,3 +61,4 @@ endif
 clean:
 	@rm -rf $(DOIT_SCRIPT)
 	@rm -rf $(INMS_CSV)
+	@dropdb $(DB_NAME)
