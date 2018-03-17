@@ -17,11 +17,13 @@ IMPORT_INMS_SCRIPT=$(OUTPUT_DIR)/inms.sql
 CDA_CSV=$(DATA_DIR)/cda.csv
 CDA_ARCHIVE=$(DATA_DIR)/cda.csv.xz
 CDA_SCRIPT=$(SQL_DIR)/0010-cda-import.sql
-NADIRS_SCRIPT=$(SQL_DIR)/0008-nadirs.sql
-FLYBYS_SCRIPT=$(SQL_DIR)/0009-flybys-table.sql
+FLYBYS_SCRIPT=$(SQL_DIR)/0013-jpl-flybys.sql
+FLYBYS_CSV=$(DATA_DIR)/jpl_flybys.csv
+TIMEALT_SCRIPT=$(SQL_DIR)/0014-time-altitudes.sql
 
 all: normalize-mp flyby inms cda
-	@createdb $(DB_NAME)
+	@dropdb $(DB_NAME) -U postgres
+	@createdb $(DB_NAME) -U postgres
 	psql $(DB_NAME) -U postgres -f $(DOIT_SCRIPT)
 
 masterplan:
@@ -49,8 +51,8 @@ endif
 	sed -e "s|^from '.*'$$|from '$(INMS_CSV)'|" $(INMS_SCRIPT) >> $(DOIT_SCRIPT)
 
 flyby: inms
-	@cat $(NADIRS_SCRIPT) >> $(DOIT_SCRIPT)
-	@cat $(FLYBYS_SCRIPT) >> $(DOIT_SCRIPT)
+	sed -e "s|^from '.*'$$|from '$(FLYBYS_CSV)'|" $(FLYBYS_SCRIPT) >> $(DOIT_SCRIPT)
+	@cat $(TIMEALT_SCRIPT) >> $(DOIT_SCRIPT)
 
 cda: normalize-mp
 ifeq ("$(wildcard $(CDA_CSV))","")
